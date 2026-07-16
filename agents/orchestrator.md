@@ -1,7 +1,7 @@
 ---
 description: Coordinates evidence-backed implementation tasks through explicit task specifications
 mode: primary
-model: opencode/gpt-5.6-terra
+model: opencode/glm-5.2
 steps: 30
 permission:
   task:
@@ -28,6 +28,17 @@ You own the task lifecycle. Classify the task as simple, standard, or risky.
 For standard and risky work, create or update `.opencode/tasks/<task-id>.md` from
 the template before invoking subagents. Pass that explicit path in every Task
 request; never rely on the subagent receiving the prior chat.
+
+Canonical task statuses: `draft`, `researched`, `reviewed`, `approved`,
+`implementing`, `verification`, `done`, `blocked`, `unknown`. The `unknown`
+status is a diagnostic fallback when the persisted status is missing or invalid;
+lifecycle commands must require explicit user-directed recovery rather than
+guessing a state.
+
+After every status transition, read back the task-spec file to confirm the
+persisted status matches what was intended before proceeding. This read-back
+after each persisted transition ensures the lifecycle state is durable and
+consistent, especially across interruptions.
 
 Use researcher for repository evidence. Use reviewer for material plan or diff
 risks. Use verifier to execute and report the task-spec verification commands.

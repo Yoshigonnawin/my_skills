@@ -11,4 +11,5 @@ that task instead of overwriting it.
 Create the file from `.opencode/tasks/TEMPLATE.md`, set status to `draft`, and
 record the description. Invoke researcher through Task with the task description
 and the explicit task-spec path. Incorporate repository evidence into the
-task-spec, set status to `researched`, and report the path and open assumptions.
+task-spec, then set status from `draft` to `researched` immediately, and report
+the path and open assumptions.

@@ -5,7 +5,9 @@ agent: orchestrator
 
 Parse `$ARGUMENTS` as `<task-id>` and read `.opencode/tasks/<task-id>.md`.
 Require status `researched` or `reviewed`. Invoke reviewer through Task with the
-explicit task-spec path and request a plan review. Save only evidence-backed
-findings in the Review findings section. Set status to `approved` when the result
-is APPROVED; otherwise set it to `reviewed` and report the BLOCKER and MAJOR
-items that require a decision or correction.
+explicit task-spec path and instruct it to operate in **plan review mode**: read
+only the task-spec, do not run `git diff`, there is no implementation yet. Save
+only evidence-backed findings in the Plan Review subsection of Review Findings.
+Persist the verdict: set status to `approved` when the verdict is APPROVED;
+otherwise set status to `reviewed` and report the BLOCKER and MAJOR items that
+require a decision or correction.

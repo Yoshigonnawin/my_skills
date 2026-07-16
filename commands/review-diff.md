@@ -4,6 +4,9 @@ agent: orchestrator
 ---
 
 Parse `$ARGUMENTS` as `<task-id>` and read `.opencode/tasks/<task-id>.md`.
-Invoke reviewer through Task with the explicit task-spec path and request a diff
-review against its acceptance criteria. Record findings in Review findings. Do
-not claim the task is complete solely because review returns APPROVED.
+Require status `implementing` or later. Invoke reviewer through Task with the
+explicit task-spec path and instruct it to operate in **diff review mode**: read
+the task-spec, run `git diff` against the working tree, and compare the diff
+against Planned Changes, Out of Scope, and Acceptance Criteria. Record findings
+in the Diff Review subsection of Review Findings. Persist the verdict: on
+APPROVED, set status to `verification`; on CHANGES REQUIRED, set status to `implementing`. Do not claim the task is complete solely because the verdict is APPROVED.

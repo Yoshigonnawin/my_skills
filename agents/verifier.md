@@ -14,6 +14,7 @@ permission:
     "uv run --package csa-shared-kernel pytest*": allow
     "uv run --package csa-domain pytest*": allow
     "uv run --package csa-worker pytest*": allow
+    "rg *": allow
   task: deny
   question: deny
 ---
