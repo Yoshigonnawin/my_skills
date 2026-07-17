@@ -62,6 +62,9 @@ opencode
 │   ├── orchestrator.md
 │   ├── researcher.md
 │   ├── reviewer.md
+│   ├── coder-easy.md
+│   ├── coder-medium.md
+│   ├── coder-hard.md
 │   └── verifier.md
 ├── commands/
 │   ├── prepare.md
@@ -88,7 +91,8 @@ task-spec нужен как аудитный артефакт, уберите э
 
 `orchestrator` -- основной primary-агент. Он классифицирует задачу, создаёт
 task-spec, вызывает ограниченных subagents через `Task`, запрашивает решение
-человека при необходимости, реализует задачу и фиксирует результаты проверки.
+человека при необходимости и фиксирует результаты проверки. Он никогда не
+реализует задачу сам -- код всегда пишет один из `coder-*` (см. ниже).
 
 Его `permission.task` разрешает только известные роли. Это исключает случайный
 вызов произвольных subagents. Встроенные `plan` и `build` остаются хорошим
@@ -102,10 +106,35 @@ task-spec, вызывает ограниченных subagents через `Task`
 
 ### Reviewer
 
-`reviewer` -- скрытый read-only subagent. Он проверяет task-spec или diff и
-возвращает только подтверждённые замечания `BLOCKER`, `MAJOR` или `MINOR`.
-Каждое существенное замечание обязано содержать repository evidence, последствие
+`reviewer` -- скрытый read-only subagent. Он работает в одном из двух явных
+режимов: plan review (читает только task-spec, без implementation) или diff
+review (сверяет `git diff` с Planned Changes и Out of Scope). Возвращает
+только подтверждённые замечания `BLOCKER`, `MAJOR` или `MINOR`. Каждое
+существенное замечание обязано содержать repository evidence, последствие
 и минимальную коррекцию. Отсутствие BLOCKER и MAJOR означает `APPROVED`.
+
+### Coder
+
+`coder-easy`, `coder-medium` и `coder-hard` -- скрытые subagents с правом
+`edit`, но без `task` и `question`. Они -- единственное место, где реально
+пишется код: orchestrator никогда не редактирует исходный код напрямую,
+только `tasks/`. Выбор между тремя ролями идёт по **сложности реализации**,
+а не по risk задачи -- это разные оси: рискованная задача (auth, платежи)
+может быть однострочным фиксом, а обычная задача может требовать сложного
+кросс-компонентного рефакторинга.
+
+- `coder-easy` -- один файл, есть чёткий существующий аналог в коде,
+  решения не требуются. Дешёвая быстрая модель.
+- `coder-medium` -- несколько файлов, нужно немного суждения, но без
+  архитектурных решений.
+- `coder-hard` -- несколько взаимодействующих компонентов, нет готового
+  аналога, реальные архитектурные решения. Всегда используется для
+  `risky`-задач после human gate, независимо от видимого размера диффа.
+
+Критерий -- явная эвристика в промпте orchestrator'а/`/implement`, а не
+отдельное поле в task-spec: если субагент по ходу работы понимает, что
+сложность выше присвоенного уровня, он обязан остановиться и сообщить об
+этом, а не проталкивать реализацию через силу.
 
 ### Verifier
 
@@ -127,6 +156,16 @@ task-spec, вызывает ограниченных subagents через `Task`
 Поэтому у researcher и reviewer произвольный `bash` запрещён; разрешены только
 безопасные команды чтения состояния Git. Поиск и чтение выполняются встроенными
 `glob`, `grep`, `read` и, когда доступен, `lsp`.
+
+В отличие от `bash`, permission `edit` в OpenCode -- это единый переключатель
+`allow`/`ask`/`deny` без scoping по путям (проверено по типам SDK: `bash`
+допускает объект `{glob: allow|ask|deny}`, `edit` -- нет). Поэтому правило
+«orchestrator редактирует только `tasks/`, а код пишут coder-easy/medium/hard» --
+это дисциплина промпта плюс структурная проверка в `/implement` (наличие
+`APPROVED` в Plan Review перед реализацией), а не техническая граница
+permissions. Это осознанный компромисс текущей версии OpenCode, а не
+недосмотр -- если он станет неприемлем, единственный способ получить
+техническую гарантию -- внешний plugin/hook.
 
 `steps` ограничивает число agentic-итераций, но не является лимитом токенов,
 стоимости или времени. Retry policy в skill также является дисциплиной процесса,
@@ -189,11 +228,14 @@ build -> focused checks -> diff inspection
 нескольких файлах.
 
 ```text
-orchestrator -> researcher via Task -> task-spec -> implement -> verifier
+orchestrator -> researcher -> task-spec -> reviewer(plan) -> implement (coder-easy/medium/hard) -> verifier
 ```
 
-Проверяйте итоговый diff reviewer-ом, если затронуты несколько контрактов или
-есть неопределённость. Не проводите review плана по умолчанию.
+Review плана обязателен для любой `standard`-задачи -- `/implement` технически
+проверяет наличие вердикта `APPROVED` в Plan Review и отказывается запускать
+реализацию без него. Diff-review остаётся опциональным: проверяйте итоговый
+diff reviewer-ом, если затронуты несколько контрактов или есть
+неопределённость.
 
 ### Рискованная задача
 
@@ -201,7 +243,7 @@ orchestrator -> researcher via Task -> task-spec -> implement -> verifier
 конкурентность, необратимая операция.
 
 ```text
-orchestrator -> researcher -> reviewer(plan) -> human gate -> implement
+orchestrator -> researcher -> reviewer(plan) -> human gate -> implement (coder-hard)
              -> reviewer(diff) -> verifier
 ```
 
@@ -305,6 +347,9 @@ opencode --continue --fork
 ## 13. Антипаттерны
 
 - Вызов primary-агента через `@`.
+- Orchestrator редактирует исходный код напрямую вместо делегирования
+  coder-easy/coder-medium/coder-hard.
+- Выбор coder-роли по risk задачи вместо реальной сложности реализации.
 - Reviewer без явного task-spec или acceptance criteria.
 - Read-only агент с `bash: ask` и разрешением на произвольные команды.
 - Один общий `current.md` для параллельных задач.
