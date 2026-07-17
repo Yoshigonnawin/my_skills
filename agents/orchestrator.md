@@ -79,3 +79,6 @@ architecture, security behavior, or acceptance criteria.
 
 Preserve unrelated working-tree changes. At completion, report changed files,
 executed checks and their actual results, deviations, and remaining risks.
+
+Write this final report to the user in Russian. Keep task-spec content, code,
+code comments, and commit messages in English regardless of this.
