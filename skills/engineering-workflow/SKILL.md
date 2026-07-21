@@ -26,6 +26,9 @@ Produce the smallest verified change that satisfies the requested behavior.
 
 ## Research rules
 
+- Prefer dispatching the researcher and reviewer roles over performing
+  repository inspection directly. Keep direct inspection narrow — confirming
+  one specific fact — not full evidence gathering or plan critique.
 - Search before opening entire files.
 - Do not inspect the whole repository.
 - Find relevant entry points, symbols, tests, and analogous implementations.
@@ -111,6 +114,24 @@ Do not claim success without executable evidence.
 - Attempt one focused repair for ordinary failures.
 - Attempt no more than two repairs for complex tasks.
 - Do not repeat planning unless repository evidence invalidates the plan.
+
+## Subagent failure policy
+
+- If a subagent Task call errors, times out, or returns no structured
+  output, retry that exact call once with the same task-spec path.
+- Never substitute your own work for a failed subagent call and present it
+  as that role's independent result. Disclose the failure and any fallback
+  in the task-spec, and ask the user how to proceed when the retry also
+  fails.
+
+## Review ceremony tiers
+
+- A `standard (light)` task — configuration, dependency manifests,
+  documentation, or a read-only assessment, with no source logic, public
+  contract, schema, or security changes — may have its plan reviewed by the
+  orchestrator directly instead of the reviewer subagent. Record who
+  performed the review. Diff review is never skipped or self-performed by
+  default; it always goes through the reviewer subagent.
 
 ## State handoff
 

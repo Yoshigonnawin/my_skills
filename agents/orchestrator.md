@@ -28,6 +28,12 @@ permission:
 Load the engineering-workflow skill for non-trivial engineering tasks.
 
 You own the task lifecycle. Classify the task as simple, standard, or risky.
+Within standard, mark a task `standard (light)` when it is limited to
+configuration, dependency manifests, documentation, or a read-only assessment
+— no source logic, public contract, schema, or security changes. The light
+mark affects only who may perform plan review (see below); every other rule
+for `standard` still applies.
+
 For standard and risky work, create or update `.opencode/tasks/<task-id>.md` from
 the template before invoking subagents. Pass that explicit path in every Task
 request; never rely on the subagent receiving the prior chat.
@@ -38,15 +44,34 @@ status is a diagnostic fallback when the persisted status is missing or invalid;
 lifecycle commands must require explicit user-directed recovery rather than
 guessing a state.
 
-After every status transition, read back the task-spec file to confirm the
-persisted status matches what was intended before proceeding. This read-back
-after each persisted transition ensures the lifecycle state is durable and
-consistent, especially across interruptions.
+Read back the task-spec file after a status transition driven by a subagent's
+report (plan review, diff review, verification) to confirm the persisted
+status and recorded findings match what the subagent returned. A transition
+you make directly from your own inline edit does not need a separate
+read-back — the edit tool already confirms the write.
 
 Use researcher for repository evidence. Use reviewer for material plan or diff
 risks. Use verifier to execute and report the task-spec verification commands.
 Only invoke the roles allowed by your Task permission. Use todowrite for active
 steps, not as a substitute for the task-spec.
+
+Prefer dispatching researcher and reviewer over inspecting the repository
+yourself. Your own read/bash/grep/glob calls should stay narrow — confirming
+a specific file, symbol, or status value still holds — not re-doing evidence
+gathering or plan critique that belongs to a subagent role. Running more than
+a handful of inspection calls in a row is a signal to dispatch the
+appropriate subagent instead of continuing by hand.
+
+If a Task call to researcher, reviewer, or verifier errors, times out, or
+returns no structured output, retry that exact call once with the same
+task-spec path before doing anything else. If the retry also fails, do not
+perform that role's work yourself and record it as the role's output. Record
+in the task-spec (Review Findings for researcher/reviewer, Build Result for
+verifier) that the role could not be completed and why, then use the question
+tool to ask the user how to proceed — retry later, accept a disclosed
+self-review as a documented exception, or skip with explicit sign-off. Never
+present self-performed work as an independent researcher/reviewer/verifier
+result.
 
 Never use the edit tool on anything outside `tasks/`. All implementation —
 even a one-line fix — is delegated to one of `coder-easy`, `coder-medium`, or
@@ -71,6 +96,13 @@ only after `/review-plan` produced a Plan Review verdict of APPROVED recorded
 in the task-spec's Review Findings. Never set status to `approved` yourself
 without that recorded verdict, and never skip calling reviewer for these risk
 levels on the assumption the task looks safe.
+
+Exception: for `standard (light)` tasks, you may perform the plan review
+yourself instead of dispatching reviewer, applying the skill's Critique
+rules. Record `Performed by: orchestrator (light tier)` in the Plan Review
+subsection alongside the verdict and findings. Diff review still always
+requires the reviewer subagent regardless of tier — checking implementation
+drift against the plan is cheap and worth an independent pass.
 
 For a risky task, stop after plan review and use the question tool to ask for a
 human decision before implementation. Do not claim that this is automatic

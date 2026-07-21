@@ -4,10 +4,22 @@ agent: orchestrator
 ---
 
 Parse `$ARGUMENTS` as `<task-id>` and read `.opencode/tasks/<task-id>.md`.
-Require status `researched` or `reviewed`. Invoke reviewer through Task with the
-explicit task-spec path and instruct it to operate in **plan review mode**: read
-only the task-spec, do not run `git diff`, there is no implementation yet. Save
-only evidence-backed findings in the Plan Review subsection of Review Findings.
+Require status `researched` or `reviewed`.
+
+If risk is `standard (light)`, perform the plan review yourself using the
+skill's Critique rules instead of dispatching reviewer. Record
+`Performed by: orchestrator (light tier)` plus the findings in the Plan
+Review subsection.
+
+Otherwise invoke reviewer through Task with the explicit task-spec path and
+instruct it to operate in **plan review mode**: read only the task-spec, do
+not run `git diff`, there is no implementation yet. If the Task call errors
+or returns no structured output, retry once with the same task-spec path
+before falling back to the orchestrator's subagent-failure policy (disclose,
+never silently self-substitute). Save only evidence-backed findings, plus
+`Performed by: reviewer subagent`, in the Plan Review subsection of Review
+Findings.
+
 Persist the verdict: set status to `approved` when the verdict is APPROVED;
 otherwise set status to `reviewed` and report the BLOCKER and MAJOR items that
 require a decision or correction.
