@@ -1,7 +1,7 @@
 ---
 description: Independently reviews task specifications and diffs for evidence-backed material risks
 mode: subagent
-model: opencode/claude-sonnet-5
+model: opencode/gpt-5.6-terra
 hidden: true
 steps: 20
 permission:

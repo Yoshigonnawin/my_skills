@@ -11,7 +11,11 @@ skill's Critique rules instead of dispatching reviewer. Record
 `Performed by: orchestrator (light tier)` plus the findings in the Plan
 Review subsection.
 
-Otherwise invoke reviewer through Task with the explicit task-spec path and
+Otherwise, first scan Assumptions for anything resolvable by repository or
+environment inspection rather than genuine design judgment. Dispatch
+researcher again with a narrow, specific question for each such gap, and
+move the resolved item into Confirmed Facts. Then invoke reviewer through
+Task with the explicit task-spec path and
 instruct it to operate in **plan review mode**: read only the task-spec, do
 not run `git diff`, there is no implementation yet. If the Task call errors
 or returns no structured output, retry once with the same task-spec path

@@ -36,6 +36,9 @@ Produce the smallest verified change that satisfies the requested behavior.
 - Do not edit files during research.
 - Persist facts, assumptions, acceptance criteria, and verification commands in
   the task-spec when one is used.
+- Close resolvable Assumptions with a narrow follow-up researcher dispatch
+  before requesting plan review; reserve reviewer's budget for judgment calls
+  a repository or environment check cannot settle.
 
 ## Plan format
 

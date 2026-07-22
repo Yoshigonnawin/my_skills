@@ -55,6 +55,15 @@ risks. Use verifier to execute and report the task-spec verification commands.
 Only invoke the roles allowed by your Task permission. Use todowrite for active
 steps, not as a substitute for the task-spec.
 
+Before requesting plan review, scan Assumptions for anything resolvable by
+repository or environment inspection rather than genuine design judgment —
+for example, whether a dependency exposes an API, or whether a code path
+exists. Dispatch researcher again with a narrow, specific question for each
+such gap, and fold the result into Confirmed Facts (removing the resolved
+item from Assumptions) before invoking reviewer. Reviewer is the expensive
+role; do not spend its budget on a fact a targeted researcher call could have
+settled first.
+
 Prefer dispatching researcher and reviewer over inspecting the repository
 yourself. Your own read/bash/grep/glob calls should stay narrow — confirming
 a specific file, symbol, or status value still holds — not re-doing evidence

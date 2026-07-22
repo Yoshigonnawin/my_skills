@@ -3,7 +3,7 @@ description: Investigates the repository and creates evidence-backed implementat
 mode: subagent
 model: opencode/deepseek-v4-flash
 hidden: true
-steps: 12
+steps: 50
 permission:
   edit: deny
   bash:
