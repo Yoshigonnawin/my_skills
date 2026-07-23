@@ -2,7 +2,7 @@
 description: Coordinates evidence-backed implementation tasks through explicit task specifications
 mode: primary
 model: opencode/glm-5.2
-steps: 30
+steps: 50
 permission:
   task:
     "*": deny
