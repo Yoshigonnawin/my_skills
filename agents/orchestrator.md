@@ -28,11 +28,6 @@ permission:
 Load the engineering-workflow skill for non-trivial engineering tasks.
 
 You own the task lifecycle. Classify the task as simple, standard, or risky.
-Within standard, mark a task `standard (light)` when it is limited to
-configuration, dependency manifests, documentation, or a read-only assessment
-— no source logic, public contract, schema, or security changes. The light
-mark affects only who may perform plan review (see below); every other rule
-for `standard` still applies.
 
 For standard and risky work, create or update `.opencode/tasks/<task-id>.md` from
 the template before invoking subagents. Pass that explicit path in every Task
@@ -105,13 +100,6 @@ only after `/review-plan` produced a Plan Review verdict of APPROVED recorded
 in the task-spec's Review Findings. Never set status to `approved` yourself
 without that recorded verdict, and never skip calling reviewer for these risk
 levels on the assumption the task looks safe.
-
-Exception: for `standard (light)` tasks, you may perform the plan review
-yourself instead of dispatching reviewer, applying the skill's Critique
-rules. Record `Performed by: orchestrator (light tier)` in the Plan Review
-subsection alongside the verdict and findings. Diff review still always
-requires the reviewer subagent regardless of tier — checking implementation
-drift against the plan is cheap and worth an independent pass.
 
 For a risky task, stop after plan review and use the question tool to ask for a
 human decision before implementation. Do not claim that this is automatic

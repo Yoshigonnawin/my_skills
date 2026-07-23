@@ -18,13 +18,7 @@ Valid statuses: `draft`, `researched`, `reviewed`, `approved`, `implementing`, `
 
 ## Risk
 
-`simple | standard | standard (light) | risky`
-
-`standard (light)` — configuration, dependency manifests, documentation, or a
-read-only assessment only; no source logic, public contract, schema, or
-security changes. Plan review may then be performed by the orchestrator
-directly instead of the reviewer subagent (see Review Findings). Diff review
-still always goes through the reviewer subagent.
+`simple | standard | risky`
 
 ## Goal
 

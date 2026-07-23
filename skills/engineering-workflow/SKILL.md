@@ -26,9 +26,10 @@ Produce the smallest verified change that satisfies the requested behavior.
 
 ## Research rules
 
-- Prefer dispatching the researcher and reviewer roles over performing
-  repository inspection directly. Keep direct inspection narrow — confirming
-  one specific fact — not full evidence gathering or plan critique.
+- Dispatch the researcher role for repository inspection rather than doing it
+  yourself. Keep direct inspection narrow — confirming one specific fact —
+  not full evidence gathering. Reviewer dispatch rules are separate (see Ad
+  hoc research and review below).
 - Search before opening entire files.
 - Do not inspect the whole repository.
 - Find relevant entry points, symbols, tests, and analogous implementations.
@@ -127,14 +128,27 @@ Do not claim success without executable evidence.
   in the task-spec, and ask the user how to proceed when the retry also
   fails.
 
-## Review ceremony tiers
+## Ad hoc research and review (plan/build)
 
-- A `standard (light)` task — configuration, dependency manifests,
-  documentation, or a read-only assessment, with no source logic, public
-  contract, schema, or security changes — may have its plan reviewed by the
-  orchestrator directly instead of the reviewer subagent. Record who
-  performed the review. Diff review is never skipped or self-performed by
-  default; it always goes through the reviewer subagent.
+Outside the task-spec command chain — a `plan` or `build` primary agent
+working directly, without `/prepare` — the following still applies:
+
+- Delegating repository research to `researcher` is mandatory, not optional.
+  Dispatch it via `Task` for any non-trivial lookup, repeatedly if needed —
+  many narrow researcher calls are cheap. Do not read or grep broad parts of
+  the repository yourself; that is the expensive path and belongs to
+  researcher.
+- Calling `reviewer` is a judgment call, not a gate: when a plan or diff is
+  complex or risky enough that an independent check would plausibly catch
+  something real, dispatch `reviewer` via `Task` in its ad hoc mode (plan or
+  diff described directly in the request, no task-spec file). Do not call it
+  reflexively for trivial changes, and do not skip it to save a call when the
+  change genuinely warrants a second look.
+- This is advisory, not an enforced gate — unlike the task-spec chain, where
+  `/implement` technically refuses to proceed without a recorded APPROVED
+  verdict. A task with real risk (public contract, schema, security,
+  migration, irreversible operation) still belongs in the full
+  `/prepare` → `/review-plan` → `/implement` → `/verify` chain, not this path.
 
 ## State handoff
 

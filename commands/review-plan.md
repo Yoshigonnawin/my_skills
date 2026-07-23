@@ -6,12 +6,7 @@ agent: orchestrator
 Parse `$ARGUMENTS` as `<task-id>` and read `.opencode/tasks/<task-id>.md`.
 Require status `researched` or `reviewed`.
 
-If risk is `standard (light)`, perform the plan review yourself using the
-skill's Critique rules instead of dispatching reviewer. Record
-`Performed by: orchestrator (light tier)` plus the findings in the Plan
-Review subsection.
-
-Otherwise, first scan Assumptions for anything resolvable by repository or
+First scan Assumptions for anything resolvable by repository or
 environment inspection rather than genuine design judgment. Dispatch
 researcher again with a narrow, specific question for each such gap, and
 move the resolved item into Confirmed Facts. Then invoke reviewer through

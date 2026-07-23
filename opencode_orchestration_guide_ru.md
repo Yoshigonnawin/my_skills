@@ -20,6 +20,14 @@ OpenCode уже включает primary-агенты `plan` и `build`, а та
 решает задачу. В этой конфигурации добавлены только роли, которых нет во
 встроенном наборе: исследователь, adversarial reviewer и verifier.
 
+`agents/plan.md` и `agents/build.md` не заводят новых агентов — это
+переопределение (merge) поверх встроенных `plan`/`build`: файл с минимальным
+frontmatter (без `mode`/`tools`/`permission`) добавляет `description` и
+дописывает system-prompt, не трогая `native`, `mode` и стандартные
+permissions/tools встроенного агента. Проверено эмпирически через
+`opencode debug agent <name>`. Назначение — обязать оба режима делегировать
+research в `researcher` и разрешить им звать `reviewer` ad hoc (см. §4).
+
 `@agent` предназначен для явного вызова subagent. Primary-агенты переключаются
 в интерфейсе OpenCode или выбираются через `opencode --agent <name>`; не
 описывайте вызов primary-агента через `@`.
@@ -59,6 +67,8 @@ opencode
 ```text
 .opencode/
 ├── agents/
+│   ├── plan.md          # override поверх встроенного plan
+│   ├── build.md         # override поверх встроенного build
 │   ├── orchestrator.md
 │   ├── researcher.md
 │   ├── reviewer.md
@@ -103,15 +113,23 @@ task-spec, вызывает ограниченных subagents через `Task`
 `researcher` -- скрытый read-only subagent. Он ищет только минимально нужные
 точки входа, аналоги и тесты. Результат содержит подтверждённые факты,
 предположения, план, критерии приёмки и команды проверки. Он не меняет файлы.
+Его вызывают не только orchestrator и `/prepare` -- `plan` и `build`
+делегируют ему любой нетривиальный поиск по репозиторию напрямую, ad hoc,
+без task-spec (обязательное правило для них, см. `agents/plan.md`/`build.md`).
 
 ### Reviewer
 
-`reviewer` -- скрытый read-only subagent. Он работает в одном из двух явных
-режимов: plan review (читает только task-spec, без implementation) или diff
-review (сверяет `git diff` с Planned Changes и Out of Scope). Возвращает
-только подтверждённые замечания `BLOCKER`, `MAJOR` или `MINOR`. Каждое
-существенное замечание обязано содержать repository evidence, последствие
-и минимальную коррекцию. Отсутствие BLOCKER и MAJOR означает `APPROVED`.
+`reviewer` -- скрытый read-only subagent. Он работает в одном из трёх явных
+режимов: plan review (читает только task-spec, без implementation), diff
+review (сверяет `git diff` с Planned Changes и Out of Scope) или ad hoc review
+(план/дифф описаны прямо в запросе, без task-spec -- режим для `plan`/`build`).
+Возвращает только подтверждённые замечания `BLOCKER`, `MAJOR` или `MINOR`.
+Каждое существенное замечание обязано содержать repository evidence,
+последствие и минимальную коррекцию. Отсутствие BLOCKER и MAJOR означает
+`APPROVED`. Для `plan`/`build` вызов ad hoc -- решение по ситуации (не гейт);
+для standard/risky задач через `/review-plan`/`/review-diff` он обязателен без
+исключений -- self-review orchestrator'ом больше не допускается ни для какого
+risk-тира.
 
 ### Coder
 
@@ -343,6 +361,13 @@ opencode --continue --fork
    в конкретной установке OpenCode перед фиксацией во frontmatter.
 7. Доступ к `.env`, внешним директориям, миграциям и destructive-командам
    требует отдельного решения пользователя.
+8. `opencode debug agent plan` и `opencode debug agent build` показывают
+   `"native": true`, тот же `mode`/`permission`/`tools`, что и до добавления
+   `agents/plan.md`/`build.md`, плюс новый `prompt`. Перепроверить после любого
+   изменения этих override-файлов -- гарантии на будущие версии OpenCode нет.
+9. В сессии `plan` или `build` на задаче, требующей заметного research,
+   модель вызывает `researcher` через `Task`, а не читает репозиторий
+   `grep`/`read` вширь сама.
 
 ## 13. Антипаттерны
 
@@ -350,7 +375,9 @@ opencode --continue --fork
 - Orchestrator редактирует исходный код напрямую вместо делегирования
   coder-easy/coder-medium/coder-hard.
 - Выбор coder-роли по risk задачи вместо реальной сложности реализации.
-- Reviewer без явного task-spec или acceptance criteria.
+- Reviewer в plan/diff-режиме без явного task-spec или acceptance criteria
+  (ad hoc-режим для `plan`/`build` -- исключение, там task-spec нет по
+  дизайну).
 - Read-only агент с `bash: ask` и разрешением на произвольные команды.
 - Один общий `current.md` для параллельных задач.
 - Копирование полной истории чата между агентами.
