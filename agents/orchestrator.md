@@ -1,7 +1,7 @@
 ---
 description: Coordinates evidence-backed implementation tasks through explicit task specifications
 mode: primary
-model: opencode/glm-5.2
+model: kimi-for-coding/k3-256k
 steps: 100
 permission:
   task:
