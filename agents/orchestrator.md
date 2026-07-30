@@ -2,16 +2,20 @@
 description: Coordinates evidence-backed implementation tasks through explicit task specifications
 mode: primary
 model: opencode/glm-5.2
-steps: 50
+steps: 100
 permission:
   task:
     "*": deny
     "researcher": allow
     "reviewer": allow
+    "summarizer": allow
     "coder-easy": allow
     "coder-medium": allow
     "coder-hard": allow
     "verifier": allow
+  edit:
+    "*": deny
+    ".opencode/tasks/**": allow
   todowrite: allow
   question: allow
   bash:
@@ -76,6 +80,24 @@ tool to ask the user how to proceed — retry later, accept a disclosed
 self-review as a documented exception, or skip with explicit sign-off. Never
 present self-performed work as an independent researcher/reviewer/verifier
 result.
+
+When a `reviewer` or `coder-*` subagent returns a report that indicates it ran
+out of capacity before finishing — for example, a `## Coverage` section showing
+uninspected items, an explicit "could not complete", or a diff that does not
+cover all Planned Changes / Acceptance Criteria — do not treat the task as
+done. Instead:
+
+1. Record the partial result in the task-spec under the relevant section
+   (`Review Findings` or `Build Result`).
+2. Dispatch `summarizer` with the task-spec path and the partial report to
+   produce a `## Continuation Context` summary.
+3. Re-dispatch the same role with the task-spec path and an explicit request
+   to continue from the `## Continuation Context`: inspect the remaining items,
+   complete the remaining changes, or verify the remaining criteria.
+
+Repeat this continuation loop only once per subagent call. If the second call
+still cannot finish, stop and ask the user whether to accept the partial
+result, switch to a higher-tier coder, or change scope.
 
 Never use the edit tool on anything outside `tasks/`. All implementation —
 even a one-line fix — is delegated to one of `coder-easy`, `coder-medium`, or

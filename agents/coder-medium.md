@@ -3,7 +3,7 @@ description: Implements medium-difficulty changes with some judgment but no arch
 mode: subagent
 model: opencode/claude-haiku-4-5
 hidden: true
-steps: 15
+steps: 80
 permission:
   edit: allow
   bash:

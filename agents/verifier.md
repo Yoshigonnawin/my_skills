@@ -3,7 +3,7 @@ description: Executes explicit task-spec verification commands and reports factu
 mode: subagent
 model: opencode/deepseek-v4-flash
 hidden: true
-steps: 12
+steps: 25
 permission:
   edit: deny
   bash:

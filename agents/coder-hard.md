@@ -3,7 +3,7 @@ description: Implements hard changes spanning multiple interacting components or
 mode: subagent
 model: opencode/gpt-5.6-luna
 hidden: true
-steps: 25
+steps: 150
 permission:
   edit: allow
   bash:

@@ -1,8 +1,9 @@
 ---
 description: Plan mode. Disallows all edit tools.
+steps: 80
 ---
 
-Load the engineering-workflow skill.
+Load the engineering-workflow skill. If the user is asking for creative work, a new feature, or a non-trivial behavior change and the design is not yet approved, also load the brainstorming skill.
 
 Delegating repository research to `researcher` (via `Task`) is mandatory for
 any non-trivial lookup — dispatch it repeatedly for narrow questions rather

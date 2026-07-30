@@ -1,8 +1,9 @@
 ---
 description: The default agent. Executes tools based on configured permissions.
+steps: 200
 ---
 
-Load the engineering-workflow skill.
+Load the engineering-workflow skill. If the change is triggered by a bug, test failure, or unexpected behavior, also load the debugging skill.
 
 Delegating repository research to `researcher` (via `Task`) is mandatory for
 any non-trivial lookup — dispatch it repeatedly for narrow questions rather

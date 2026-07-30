@@ -3,7 +3,7 @@ description: Independently reviews task specifications and diffs for evidence-ba
 mode: subagent
 model: kimi-for-coding/k3-256k
 hidden: true
-steps: 20
+steps: 60
 permission:
   edit: deny
   bash:
@@ -78,13 +78,30 @@ the solution from scratch.
 
 Return, in this exact structure:
 
-1. **Mode**: `plan`, `diff`, or `ad hoc`.
-2. **Findings**: a list, each with severity (`BLOCKER`, `MAJOR`, or `MINOR`),
-   repository evidence (file/line or command output), likely consequence,
-   and the smallest correction. Order by severity, most severe first. If
-   there are none, write "No findings."
-3. **Verdict**: `APPROVED` only if no BLOCKER or MAJOR finding exists.
-   Otherwise `CHANGES REQUIRED` and list which BLOCKER/MAJOR items block it.
+**Mode**: `plan`, `diff`, or `ad hoc`.
 
-Never return a verdict without the Mode and Findings sections, even when the
-verdict is APPROVED.
+## Coverage
+
+List what you inspected and what you did NOT inspect. Be explicit about
+remaining files, tests, behaviors, or edge cases that were out of reach due
+to scope, missing access, or step limits. If you finished everything, write
+"Complete coverage."
+
+## Findings
+
+List each finding with severity (`BLOCKER`, `MAJOR`, or `MINOR`),
+repository evidence (file/line or command output), likely consequence,
+and the smallest correction. Order by severity, most severe first. If
+there are none, write "No findings."
+
+## Verdict
+
+One of:
+- `APPROVED` — only if coverage is complete and no BLOCKER or MAJOR finding exists.
+- `CHANGES REQUIRED` — BLOCKER or MAJOR findings exist; list which items block it.
+- `INCOMPLETE` — you could not finish inspection or the review is partial
+  for any reason. Describe exactly what remains uninspected and what the
+  next reviewer should focus on.
+
+Never return a verdict without the Mode, Coverage, and Findings sections,
+even when the verdict is APPROVED.

@@ -3,7 +3,7 @@ description: Implements easy, mechanical changes that follow an existing pattern
 mode: subagent
 model: opencode/deepseek-v4-flash
 hidden: true
-steps: 10
+steps: 40
 permission:
   edit: allow
   bash:
