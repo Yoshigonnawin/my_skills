@@ -1,7 +1,7 @@
 ---
 description: Independently reviews task specifications and diffs for evidence-backed material risks
 mode: subagent
-model: opencode/gpt-5.6-terra
+model: kimi-for-coding/k3-256k
 hidden: true
 steps: 20
 permission:
